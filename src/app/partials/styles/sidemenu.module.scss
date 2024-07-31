@@ -1,0 +1,100 @@
+.sider {
+  @apply bg-white;
+  // position: absolute;
+  min-height: 100vh;
+  padding-top: 12px;
+  transition: all 0.3s;
+  top: 82px;
+  right: 64px;
+  height: 100vh;
+  width: 200px;
+
+  .mainMenu {
+    &::-webkit-scrollbar {
+      width: 0 !important;
+    }
+  }
+}
+
+.flatRight {
+  transition: all 0.3s;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.siderContainer {
+  border-radius: 30px;
+  // @apply bg-background;
+}
+
+.siderDark {
+  position: fixed;
+  min-height: 100vh;
+  padding-top: 18px;
+  background-color: transparent;
+  .siderNavItems {
+    background-color: transparent !important;
+  }
+}
+
+.siderNavItems {
+  // display: flex;
+  // flex-direction: column;
+  // align-items: center;
+  // justify-content: center;
+  // row-gap: 8px;
+  // // @apply bg-background;
+  // border: none !important;
+  // width: 46px;
+  // height: 46px;
+  // margin: 30px auto;
+  // &.active {
+  //   // @apply bg-primary #{!important};
+  //   border-radius: 50px;
+  //   position: relative;
+  //   &::after {
+  //     content: "";
+  //     height: 49px;
+  //     width: 6px;
+  //     // @apply bg-primary #{!important};
+  //     position: absolute;
+  //     left: -10px;
+  //     border-top-left-radius: 6px;
+  //     border-bottom-left-radius: 6px;
+  //   }
+  // }
+  // :global(.ant-menu-item-selected) {
+  //   border-radius: 100px;
+  //   // @apply bg-primary #{!important};
+  //   @apply text-black #{!important};
+  // }
+
+  // :global {
+  //   .ant-menu-item {
+  //     width: 45px !important;
+  //     height: 45px !important;
+  //     border-radius: 45px !important;
+  //   }
+  //   .ant-menu-submenu {
+  //     padding: 0 !important;
+  //   }
+  //   .ant-menu-submenu-title {
+  //     padding: 0 !important;
+  //   }
+  // }
+  // li {
+  //   display: flex !important;
+  //   align-items: center !important;
+  //   justify-content: center !important;
+  //   @apply px-4 #{!important};
+  //   @apply py-7 #{!important};
+  //   :global {
+  //     .ant-menu-submenu {
+  //       padding: 0 !important;
+  //     }
+  //     span:not(.ant-avatar) {
+  //       display: none !important;
+  //     }
+  //   }
+  // }
+}

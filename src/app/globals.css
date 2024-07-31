@@ -16,18 +16,59 @@
   }
 }
 
+html {
+  direction: rtl;
+  /* Optional: For better RTL support */
+  text-align: right;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: #f0f0f0;
+  font-family: var(--font-yekan);
+  text-align: right;
+}
+
+.menu-sider .active:after {
+  content: "";
+  height: 36px;
+  width: 6px;
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(249 178 51 / var(--tw-bg-opacity)) !important;
+  position: absolute;
+  left: -11px;
+  z-index: -1;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.ant-typography,
+.ant-btn,
+.ant-input,
+.ant-select,
+.ant-card,
+.ant-col,
+.ant-checkbox-wrapper,
+.ant-modal {
+  font-family: var(--font-yekan) !important;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+.map-background {
+  background-image: url("/images/map-background.svg");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.image-container {
+  position: relative;
+  width: 100%; /* Set your desired width */
+  height: 100%; /* Set your desired height */
+  margin: 50px;
 }
