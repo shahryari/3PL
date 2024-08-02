@@ -1,11 +1,13 @@
-import "./globals.css";
+import "../globals.css";
 
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
+import Header from "../partials/Header";
 import type { Metadata } from "next";
 import React from "react";
-import theme from "../../theme/themeConfig";
-import { yekan } from "./fonts";
+import Sidebar from "../partials/Sidebar";
+import theme from "../../../theme/themeConfig";
+import { yekan } from "../fonts";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,7 +20,11 @@ const RootLayout = ({ children }: React.PropsWithChildren) => (
       <ConfigProvider theme={{ ...theme }}>
         <AntdRegistry>
           <div className="flex flex-col my-4 gap-y-4 h-full">
+            <Header />
+
             <div className="flex flex-row h-screen gap-x-2">
+              <Sidebar />
+
               <div className="w-full">{children}</div>
             </div>
           </div>

@@ -1,9 +1,11 @@
 "use client";
+
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { Lock, Sms } from "iconsax-react";
-import Image from "next/image";
 import React, { useState } from "react";
+
 import Cookies from "js-cookie";
+import Image from "next/image";
 
 const Login = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -27,7 +29,12 @@ const Login = () => {
       // Assuming the API returns a token or session ID
       const { TokenID, FullName } = data;
 
-      Cookies.set("authToken", TokenID, { expires: 7, secure: true });
+      Cookies.set(".glctest", TokenID, {
+        expires: 7,
+        secure: true,
+        sameSite: "None",
+      });
+
       Cookies.set("name", FullName, { expires: 7, secure: true });
 
       message.success("Login successful!");

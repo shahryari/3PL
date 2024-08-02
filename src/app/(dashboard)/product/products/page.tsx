@@ -14,10 +14,12 @@ import {
   Table,
   TableColumnType,
   TableColumnsType,
+  message,
 } from "antd";
 import type { DraggableData, DraggableEvent } from "react-draggable";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import Cookies from "js-cookie";
 import Draggable from "react-draggable";
 import { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
@@ -67,6 +69,34 @@ const Products = () => {
     bottom: 0,
     right: 0,
   });
+
+  const getProducts = async () => {
+    const authToken = Cookies.get(".glctest");
+    if (!authToken) return;
+
+    console.log(authToken);
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/products`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include"
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await response.json();
+  };
+
+  useEffect(() => {
+    getProducts();
+  }, []);
 
   const draggleRef = useRef<HTMLDivElement>(null);
 
@@ -237,21 +267,21 @@ const Products = () => {
 
   const columns: TableColumnsType<DataType> = [
     {
-      title: "Name",
+      title: "عنوان",
       dataIndex: "name",
       key: "name",
       width: "30%",
       ...getColumnSearchProps("name"),
     },
     {
-      title: "Age",
+      title: "تعداد",
       dataIndex: "age",
       key: "age",
       width: "20%",
       ...getColumnSearchProps("age"),
     },
     {
-      title: "Address",
+      title: "آدرس",
       dataIndex: "address",
       key: "address",
       ...getColumnSearchProps("address"),

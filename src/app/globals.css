@@ -49,7 +49,9 @@ body {
 .ant-card,
 .ant-col,
 .ant-checkbox-wrapper,
-.ant-modal {
+.ant-modal,
+.ant-menu,
+.ant-table {
   font-family: var(--font-yekan) !important;
 }
 
