@@ -74,16 +74,21 @@ const Products = () => {
     const authToken = Cookies.get(".glctest");
     if (!authToken) return;
 
-    console.log(authToken);
+    var urlencoded = new URLSearchParams();
+    urlencoded.append("page", "1");
+    urlencoded.append("rows", "20");
+    urlencoded.append("sort", "CreatedOn");
+    urlencoded.append("order", "Desc");
 
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/products`,
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        credentials: "include"
+        credentials: "include",
+        body: urlencoded,
       }
     );
 
