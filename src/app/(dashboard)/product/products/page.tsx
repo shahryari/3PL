@@ -297,10 +297,10 @@ const Products = () => {
       sortDirections: ["descend", "ascend"],
     },
   ];
-   const breadcrumbData: BreadcrumbItem[] = [
-     { label: "محصولات", href: "#" },
-     { label: "لیست محصولات", href: "/product/products" }, // No href for the current page
-   ];
+  const breadcrumbData: BreadcrumbItem[] = [
+    { label: "کالا", href: "#" },
+    { label: "لیست کالاها", href: "/product/products" }, // No href for the current page
+  ];
   return (
     <>
       <Breadcrumb items={breadcrumbData} />

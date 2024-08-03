@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation"; 
+import { usePathname } from "next/navigation";
 import { Breadcrumb as AntBreadcrumb } from "antd";
 import { Calendar, Home, InfoCircle, Building3 } from "iconsax-react";
 import { ConfigProvider } from "../../../../node_modules/antd/es/index";
@@ -11,7 +11,7 @@ export interface BreadcrumbItem {
 }
 
 const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
-  const pathname = usePathname(); 
+  const pathname = usePathname();
   const [currentRoute, setCurrentRoute] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,7 +56,8 @@ const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
             Breadcrumb: {
               itemColor: "#969696",
               iconFontSize: 14,
-              lastItemColor:"#000",
+              lastItemColor: "#000",
+              separatorMargin: 12,
             },
           },
         }}
