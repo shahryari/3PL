@@ -23,6 +23,9 @@ import Cookies from "js-cookie";
 import Draggable from "react-draggable";
 import { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
+import Breadcrumb, {
+  BreadcrumbItem,
+} from "./../../../../components/ui/Breadcrumb/Breadcrumb";
 
 interface DataType {
   key: string;
@@ -294,97 +297,112 @@ const Products = () => {
       sortDirections: ["descend", "ascend"],
     },
   ];
-
+  const breadcrumbData: BreadcrumbItem[] = [
+    { label: "اطلاعات پایه", href: "#" },
+    { label: "محصولات", href: "#" },
+    { label: "لیست محصولات", href: "product/products" }, // No href for the current page
+  ];
   return (
-    <Card title="لیست کالاها" extra={<InfoCircle />}>
-      <div className="flex flex-col gap-y-4">
-        <div className="flex justify-between">
-          <Dropdown menu={menuProps}>
-            <Button>
-              <Space>
-                اکشن دسته جمعی
-                <ArrowDown2 size={18} />
-              </Space>
-            </Button>
-          </Dropdown>
-          <div>
-            <Button
-              type="primary"
-              className="flex flex-row items-center"
-              onClick={showModal}
-            >
-              <Add className="text-black" />
-              <span className="text-black">افزودن آیتم جدید</span>
-            </Button>
+    <>
+      <Breadcrumb items={breadcrumbData} />
+      <Card title="لیست کالاها" extra={<InfoCircle />}>
+        <div className="flex flex-col gap-y-4">
+          <div className="flex justify-between">
+            <Dropdown menu={menuProps}>
+              <Button>
+                <Space>
+                  اکشن دسته جمعی
+                  <ArrowDown2 size={18} />
+                </Space>
+              </Button>
+            </Dropdown>
+            <div>
+              <Button
+                type="primary"
+                className="flex flex-row items-center"
+                onClick={showModal}
+              >
+                <Add className="text-black" />
+                <span className="text-black">افزودن آیتم جدید</span>
+              </Button>
+            </div>
           </div>
+
+          <Table
+            columns={columns}
+            dataSource={data}
+            pagination={{ hideOnSinglePage: true }}
+          />
         </div>
 
-        <Table
-          columns={columns}
-          dataSource={data}
-          pagination={{ hideOnSinglePage: true }}
-        />
-      </div>
+        <Modal
+          centered
+          title={
+            <div
+              style={{ width: "100%", cursor: "move" }}
+              onMouseOver={() => {
+                if (disabled) {
+                  setDisabled(false);
+                }
+              }}
+              onMouseOut={() => {
+                setDisabled(true);
+              }}
+              onFocus={() => {}}
+              onBlur={() => {}}
+            >
+              افزودن کالا
+            </div>
+          }
+          open={open}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          footer={(_, { OkBtn, CancelBtn }) => <></>}
+          modalRender={(modal) => (
+            <Draggable
+              disabled={disabled}
+              bounds={bounds}
+              nodeRef={draggleRef}
+              onStart={(event, uiData) => onStart(event, uiData)}
+            >
+              <div ref={draggleRef}>{modal}</div>
+            </Draggable>
+          )}
+        >
+          <Form name="basic" autoComplete="off">
+            <Form.Item
+              label="Username"
+              name="username"
+              rules={[
+                { required: true, message: "Please input your username!" },
+              ]}
+            >
+              <Input />
+            </Form.Item>
 
-      <Modal
-        centered
-        title={
-          <div
-            style={{ width: "100%", cursor: "move" }}
-            onMouseOver={() => {
-              if (disabled) {
-                setDisabled(false);
-              }
-            }}
-            onMouseOut={() => {
-              setDisabled(true);
-            }}
-            onFocus={() => {}}
-            onBlur={() => {}}
-          >
-            افزودن کالا
-          </div>
-        }
-        open={open}
-        onOk={handleOk}
-        onCancel={handleCancel}
-        footer={(_, { OkBtn, CancelBtn }) => <></>}
-        modalRender={(modal) => (
-          <Draggable
-            disabled={disabled}
-            bounds={bounds}
-            nodeRef={draggleRef}
-            onStart={(event, uiData) => onStart(event, uiData)}
-          >
-            <div ref={draggleRef}>{modal}</div>
-          </Draggable>
-        )}
-      >
-        <Form name="basic" autoComplete="off">
-          <Form.Item
-            label="Username"
-            name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
-          >
-            <Input />
-          </Form.Item>
+            <Form.Item
+              label="Password"
+              name="password"
+              rules={[
+                { required: true, message: "Please input your password!" },
+              ]}
+            >
+              <Input.Password />
+            </Form.Item>
 
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
-            <Input.Password />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" className="!bg-green-600">
-              ذخیره
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-    </Card>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="!bg-green-600"
+              >
+                ذخیره
+              </Button>
+            </Form.Item>
+          </Form>
+        </Modal>
+      </Card>
+    </>
   );
 };
 

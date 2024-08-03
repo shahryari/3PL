@@ -33,6 +33,7 @@ const SideMenu = ({ collapsed, setCollapsed }: any) => {
   const pathname = usePathname();
 
   const hotels: MenuProps["items"] = [
+    getItem("انبار", "pms/warehouse", null),
     getItem("کالاها", "room", null, [
       getItem("لیست کالاها", "/pms/roomtype", null),
     ]),
@@ -232,7 +233,7 @@ const SideMenu = ({ collapsed, setCollapsed }: any) => {
             </div>
           )}
         </div>
-        <div className="basis-8/12">
+        <div className="basis-full">
           <Menu
             onClick={onClick}
             selectedKeys={[active]}

@@ -115,7 +115,7 @@ const Sidebar = () => {
       `}
     >
       <div
-        className={`items-center bg-white flex flex-col justify-between w-12 rounded-lg h-full py-8`}
+        className={`items-center bg-white flex flex-col justify-between w-12 rounded-lg h-full py-[106px]`}
       >
         <div className="flex flex-col items-center justify-between gap-y-8 menu-sider">
           <Link
