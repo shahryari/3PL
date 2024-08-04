@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 
 import style from "./styles/sidemenu.module.scss";
 import { usePathname } from "next/navigation";
+import { ConfigProvider } from "../../../node_modules/antd/es/index";
+import theme from "../../../theme/themeConfig";
+
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -234,16 +237,18 @@ const SideMenu = ({ collapsed, setCollapsed }: any) => {
           )}
         </div>
         <div className="basis-full">
-          <Menu
-            onClick={onClick}
-            selectedKeys={[active]}
-            defaultSelectedKeys={["hotel"]}
-            defaultOpenKeys={[openKey]}
-            className={style.siderNavItems}
-            mode="inline"
-            inlineCollapsed={collapsed}
-            items={items}
-          />
+          <ConfigProvider theme={{ ...theme }}>
+            <Menu
+              onClick={onClick}
+              selectedKeys={[active]}
+              defaultSelectedKeys={["hotel"]}
+              defaultOpenKeys={[openKey]}
+              className={style.siderNavItems}
+              mode="inline"
+              inlineCollapsed={collapsed}
+              items={items}
+            />
+          </ConfigProvider>
         </div>
       </div>
     </Flex>

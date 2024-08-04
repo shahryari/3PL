@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { Breadcrumb as AntBreadcrumb } from "antd";
 import { Calendar, Home, InfoCircle, Building3 } from "iconsax-react";
 import { ConfigProvider } from "../../../../node_modules/antd/es/index";
+import theme from "../../../../theme/themeConfig";
 
 export interface BreadcrumbItem {
   label: string;
@@ -78,18 +79,7 @@ const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
 
   return (
     <>
-      <ConfigProvider
-        theme={{
-          components: {
-            Breadcrumb: {
-              itemColor: "#969696",
-              iconFontSize: 14,
-              lastItemColor: "#000",
-              separatorMargin: 12,
-            },
-          },
-        }}
-      >
+      <ConfigProvider theme={{ ...theme }}>
         <nav
           aria-label="breadcrumb"
           className="flex items-center space-x-2 text-sm text-gray-600 m-4"
