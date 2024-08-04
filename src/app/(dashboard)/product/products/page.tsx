@@ -28,7 +28,8 @@ import Breadcrumb, {
   BreadcrumbItem,
 } from "./../../../../components/ui/Breadcrumb/Breadcrumb";
 import moment from "moment";
-
+import { Checkbox, ConfigProvider, DatePicker } from "../../../../../node_modules/antd/es/index";
+const { TextArea } = Input;
 interface DataType {
   ProductID: string;
   ProductName: string;
@@ -48,7 +49,7 @@ const Products = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 20,
+    pageSize: 7,
     total: 0,
   });
   const [open, setOpen] = useState(false);
@@ -376,14 +377,28 @@ const Products = () => {
       sortDirections: ["descend", "ascend"],
     },
     {
-      title: "فعال",
+      title: "وضعیت",
       dataIndex: "IsActive",
       key: "IsActive",
       render: (_, record) => (
-        <Switch
-          checked={record.IsActive}
-          onChange={(checked) => handleSwitchChange(checked, record)}
-        />
+        <ConfigProvider
+          theme={{
+            token: {
+              /* here is your global tokens */
+            },
+            components: {
+              Switch: {
+                colorPrimary: "#53B761",
+                colorPrimaryHover:"#00000",
+              },
+            },
+          }}
+        >
+          <Switch
+            checked={record.IsActive}
+            onChange={(checked) => handleSwitchChange(checked, record)}
+          />
+        </ConfigProvider>
       ),
       sorter: (a, b) => Number(a.IsActive) - Number(b.IsActive),
       sortDirections: ["descend", "ascend"],
@@ -398,12 +413,47 @@ const Products = () => {
       sortDirections: ["descend", "ascend"],
     },
   ];
+  
 
   const breadcrumbData: BreadcrumbItem[] = [
     { label: "کالا", href: "#" },
     { label: "لیست کالاها", href: "/product/products" }, // No href for the current page
   ];
+ const onFinish = async (values) => {
+   try {
+     const response = await fetch("/api/ProductInsert", {
+       method: "POST",
+       headers: {
+         Accept: "application/json",
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify({
+         ProductID: values.ProductID,
+         ProductCode: values.ProductCode,
+         ProductName: values.ProductName,
+         Description: values.Description,
+         GTINCODE: values.GTINCODE,
+         Serializable: values.Serializable,
+         CreatedOn: values.CreatedOn.toISOString(),
+         IsActive: values.IsActive,
+       }),
+     });
 
+     if (!response.ok) {
+       throw new Error("Network response was not ok");
+     }
+
+     const result = await response.json();
+     if (result.success) {
+       message.success("Product added successfully!");
+       handleOk();
+     } else {
+       throw new Error(result.message || "Failed to add product");
+     }
+   } catch (error) {
+     message.error(`Failed to add product: ${error.message}`);
+   }
+ };
   return (
     <>
       <Breadcrumb items={breadcrumbData} />
@@ -459,8 +509,6 @@ const Products = () => {
               onMouseOut={() => {
                 setDisabled(true);
               }}
-              onFocus={() => {}}
-              onBlur={() => {}}
             >
               افزودن کالا
             </div>
@@ -468,7 +516,7 @@ const Products = () => {
           open={open}
           onOk={handleOk}
           onCancel={handleCancel}
-          footer={(_, { OkBtn, CancelBtn }) => <></>}
+          footer={null}
           modalRender={(modal) => (
             <Draggable
               disabled={disabled}
@@ -480,35 +528,78 @@ const Products = () => {
             </Draggable>
           )}
         >
-          <Form name="basic" autoComplete="off">
+          <Form name="product-form" onFinish={onFinish} autoComplete="off">
             <Form.Item
-              label="Username"
-              name="username"
-              rules={[
-                { required: true, message: "Please input your username!" },
-              ]}
+              label="کد محصول"
+              name="ProductCode"
+              rules={[{ required: true, message: "کد محصول را وارد کنید" }]}
             >
               <Input />
             </Form.Item>
 
             <Form.Item
-              label="Password"
-              name="password"
+              label="نام محصول"
+              name="ProductName"
+              rules={[{ required: true, message: "نام محصول را وارد کنید" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="توضیحات"
+              name="Description"
               rules={[
-                { required: true, message: "Please input your password!" },
+                { required: false, message: "Please input Description!" },
               ]}
             >
-              <Input.Password />
+              <TextArea rows={4} maxLength={6} />
+            </Form.Item>
+
+            <Form.Item
+              label="GTINCODE"
+              name="GTINCODE"
+              rules={[{ required: true, message: "Please input GTINCODE!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              name="Serializable"
+              valuePropName="checked"
+              initialValue={false}
+            >
+              <Checkbox>Serializable</Checkbox>
+            </Form.Item>
+
+            {/* <Form.Item
+              label="CreatedOn"
+              name="CreatedOn"
+              rules={[{ required: true, message: "Please select CreatedOn!" }]}
+            >
+              <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
+            </Form.Item> */}
+
+            <Form.Item
+              name="IsActive"
+              valuePropName="checked"
+              initialValue={true}
+            >
+              <Checkbox>IsActive</Checkbox>
             </Form.Item>
 
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="!bg-green-600"
-              >
-                ذخیره
-              </Button>
+              <div className="flex justify-start space-x-2">
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="!bg-green-600 ml-2"
+                >
+                  ذخیره
+                </Button>
+                <Button onClick={handleCancel} className="!#F0F0F0">
+                  انصراف
+                </Button>
+              </div>
             </Form.Item>
           </Form>
         </Modal>

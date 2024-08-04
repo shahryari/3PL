@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Breadcrumb as AntBreadcrumb } from "antd";
+import { Breadcrumb as AntBreadcrumb, Skeleton, ConfigProvider } from "antd";
 import { Calendar, Home, InfoCircle, Building3 } from "iconsax-react";
-import { ConfigProvider } from "../../../../node_modules/antd/es/index";
 import theme from "../../../../theme/themeConfig";
+import { Space } from "../../../../node_modules/antd/es/index";
 
 export interface BreadcrumbItem {
   label: string;
@@ -37,18 +37,11 @@ const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
         aria-label="breadcrumb"
         className="flex items-center space-x-2 text-sm text-gray-600 m-4"
       >
-        <AntBreadcrumb
-          separator="/"
-          items={[
-            {
-              title: (
-                <Home size={20} variant="Bulk" className="text-zinc-700" />
-              ),
-            },
-            {
-              title: <span className="text-gray-400">Loading...</span>,
-            },
-          ]}
+        <Skeleton.Input
+          active={true}
+          size={"default"}
+          paragraph={{ rows: 1, width: 280 }}
+          width={260}
         />
       </nav>
     );
