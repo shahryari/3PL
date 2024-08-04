@@ -11,6 +11,7 @@ import {
   MenuProps,
   Modal,
   Space,
+  Switch,
   Table,
   TableColumnType,
   TableColumnsType,
@@ -26,44 +27,30 @@ import Highlighter from "react-highlight-words";
 import Breadcrumb, {
   BreadcrumbItem,
 } from "./../../../../components/ui/Breadcrumb/Breadcrumb";
+import moment from "moment";
 
 interface DataType {
-  key: string;
-  name: string;
-  age: number;
-  address: string;
+  ProductID: string;
+  ProductName: string;
+  ProductCode: string;
+  GTINCODE: string;
+  Description: string;
+  Serializable: boolean;
+  IsActive: boolean;
+  CreatedOn: string;
+  AlphanumericField: string; // Added the AlphanumericField
 }
 
 type DataIndex = keyof DataType;
 
-const data: DataType[] = [
-  {
-    key: "1",
-    name: "John Brown",
-    age: 32,
-    address: "New York No. 1 Lake Park",
-  },
-  {
-    key: "2",
-    name: "Joe Black",
-    age: 42,
-    address: "London No. 1 Lake Park",
-  },
-  {
-    key: "3",
-    name: "Jim Green",
-    age: 32,
-    address: "Sydney No. 1 Lake Park",
-  },
-  {
-    key: "4",
-    name: "Jim Red",
-    age: 32,
-    address: "London No. 2 Lake Park",
-  },
-];
-
 const Products = () => {
+  const [data, setData] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 20,
+    total: 0,
+  });
   const [open, setOpen] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [bounds, setBounds] = useState({
@@ -73,38 +60,61 @@ const Products = () => {
     right: 0,
   });
 
-  const getProducts = async () => {
-    const authToken = Cookies.get(".glctest");
-    if (!authToken) return;
+  const getProducts = async (page: number, pageSize: number) => {
+    setLoading(true);
+    const authToken = Cookies.get("authToken");
+    if (!authToken) {
+      setLoading(false);
+      return;
+    }
 
-    var urlencoded = new URLSearchParams();
-    urlencoded.append("page", "1");
-    urlencoded.append("rows", "20");
+    const urlencoded = new URLSearchParams();
+    urlencoded.append("page", page.toString());
+    urlencoded.append("rows", pageSize.toString());
     urlencoded.append("sort", "CreatedOn");
     urlencoded.append("order", "Desc");
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/products`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
-        credentials: "include",
-        body: urlencoded,
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+          },
+          credentials: "include",
+          body: urlencoded,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
+      const products = await response.json();
+      setData(products.rows);
+      setPagination((prev) => ({
+        ...prev,
+        total: products.total, // Update total number of items
+      }));
+    } catch (error) {
+      message.error("Failed to load products");
+    } finally {
+      setLoading(false);
     }
-
-    const data = await response.json();
   };
 
   useEffect(() => {
-    getProducts();
-  }, []);
+    getProducts(pagination.current, pagination.pageSize);
+  }, [pagination.current, pagination.pageSize]);
+
+  const handleTableChange = (pagination) => {
+    setPagination({
+      ...pagination,
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+    });
+  };
 
   const draggleRef = useRef<HTMLDivElement>(null);
 
@@ -273,34 +283,127 @@ const Products = () => {
       ),
   });
 
+  const naturalSort = (a: string, b: string) => {
+    return a.localeCompare(b, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  };
+
+  const handleSwitchChange = async (checked: boolean, record: DataType) => {
+    const authToken = Cookies.get("authToken");
+    if (!authToken) {
+      message.error("Authentication token is missing");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products/${record.ProductID}/activate`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ isActive: checked }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        message.success("Status updated successfully");
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.ProductID === record.ProductID
+              ? { ...item, IsActive: checked }
+              : item
+          )
+        );
+      } else {
+        throw new Error(result.message || "Failed to update status");
+      }
+    } catch (error) {
+      message.error(`Failed to update status: ${error.message}`);
+    }
+  };
+
   const columns: TableColumnsType<DataType> = [
     {
-      title: "عنوان",
-      dataIndex: "name",
-      key: "name",
-      width: "30%",
-      ...getColumnSearchProps("name"),
+      title: "شناسه",
+      dataIndex: "ProductID",
+      key: "ProductID",
+      ...getColumnSearchProps("ProductID"),
+      sorter: (a, b) => a.ProductID.localeCompare(b.ProductID),
+      sortDirections: ["descend", "ascend"],
+      hidden: true,
     },
     {
-      title: "تعداد",
-      dataIndex: "age",
-      key: "age",
-      width: "20%",
-      ...getColumnSearchProps("age"),
+      title: "نام کالا",
+      dataIndex: "ProductName",
+      key: "ProductName",
+      ...getColumnSearchProps("ProductName"),
+      sorter: (a, b) => a.ProductName.localeCompare(b.ProductName),
+      sortDirections: ["descend", "ascend"],
     },
     {
-      title: "آدرس",
-      dataIndex: "address",
-      key: "address",
-      ...getColumnSearchProps("address"),
-      sorter: (a, b) => a.address.length - b.address.length,
+      title: "کد کالا",
+      dataIndex: "ProductCode",
+      key: "ProductCode",
+      ...getColumnSearchProps("ProductCode"),
+      sorter: (a, b) => a.ProductCode.localeCompare(b.ProductCode),
+      sortDirections: ["descend", "ascend"],
+    },
+    {
+      title: "کد GTIN",
+      dataIndex: "GTINCODE",
+      key: "GTINCODE",
+      ...getColumnSearchProps("GTINCODE"),
+      sorter: (a, b) => a.GTINCODE.localeCompare(b.GTINCODE),
+      sortDirections: ["descend", "ascend"],
+    },
+    {
+      title: "توضیحات",
+      dataIndex: "Description",
+      key: "Description",
+      ...getColumnSearchProps("Description"),
+      sorter: (a, b) => a.Description.length - b.Description.length,
+      sortDirections: ["descend", "ascend"],
+    },
+    {
+      title: "فعال",
+      dataIndex: "IsActive",
+      key: "IsActive",
+      render: (_, record) => (
+        <Switch
+          checked={record.IsActive}
+          onChange={(checked) => handleSwitchChange(checked, record)}
+        />
+      ),
+      sorter: (a, b) => Number(a.IsActive) - Number(b.IsActive),
+      sortDirections: ["descend", "ascend"],
+    },
+    {
+      title: "تاریخ ایجاد",
+      dataIndex: "CreatedOn",
+      key: "CreatedOn",
+      render: (text) => moment(text).format("YYYY/MM/DD - HH:mm"), // Format the date
+      sorter: (a, b) =>
+        new Date(a.CreatedOn).getTime() - new Date(b.CreatedOn).getTime(),
       sortDirections: ["descend", "ascend"],
     },
   ];
+
   const breadcrumbData: BreadcrumbItem[] = [
     { label: "کالا", href: "#" },
     { label: "لیست کالاها", href: "/product/products" }, // No href for the current page
   ];
+
   return (
     <>
       <Breadcrumb items={breadcrumbData} />
@@ -330,7 +433,16 @@ const Products = () => {
           <Table
             columns={columns}
             dataSource={data}
-            pagination={{ hideOnSinglePage: true }}
+            pagination={{
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              total: pagination.total,
+              showSizeChanger: true,
+              hideOnSinglePage: true,
+              position: ["bottomLeft"],
+            }}
+            loading={loading}
+            onChange={handleTableChange}
           />
         </div>
 
