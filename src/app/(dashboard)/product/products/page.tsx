@@ -421,23 +421,24 @@ const Products = () => {
   ];
  const onFinish = async (values) => {
    try {
-     const response = await fetch("/api/ProductInsert", {
-       method: "POST",
-       headers: {
-         Accept: "application/json",
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify({
-         ProductID: values.ProductID,
-         ProductCode: values.ProductCode,
-         ProductName: values.ProductName,
-         Description: values.Description,
-         GTINCODE: values.GTINCODE,
-         Serializable: values.Serializable,
-         CreatedOn: values.CreatedOn.toISOString(),
-         IsActive: values.IsActive,
-       }),
-     });
+     const response = await fetch(
+       `${process.env.NEXT_PUBLIC_API_URL}/ProductInsert`,
+       {
+         method: "POST",
+         headers: {
+           Accept: "application/json",
+           "Content-Type": "application/json",
+         },
+         body: JSON.stringify({
+           ProductCode: values.ProductCode,
+           ProductName: values.ProductName,
+           Description: values.Description,
+           GTINCODE: values.GTINCODE,
+           Serializable: values.Serializable,
+           IsActive: values.IsActive,
+         }),
+       }
+     );
 
      if (!response.ok) {
        throw new Error("Network response was not ok");
