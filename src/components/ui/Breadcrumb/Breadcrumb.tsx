@@ -36,17 +36,45 @@ const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
         aria-label="breadcrumb"
         className="flex items-center space-x-2 text-sm text-gray-600 m-4"
       >
-        <AntBreadcrumb separator="/">
-          <AntBreadcrumb.Item>
-            <Home size={20} variant="Bulk" className="text-zinc-700" />
-          </AntBreadcrumb.Item>
-          <AntBreadcrumb.Item>
-            <span className="text-gray-400">Loading...</span>
-          </AntBreadcrumb.Item>
-        </AntBreadcrumb>
+        <AntBreadcrumb
+          separator="/"
+          items={[
+            {
+              title: (
+                <Home size={20} variant="Bulk" className="text-zinc-700" />
+              ),
+            },
+            {
+              title: <span className="text-gray-400">Loading...</span>,
+            },
+          ]}
+        />
       </nav>
     );
   }
+
+  const breadcrumbItems = [
+    {
+      title: <Link href="/">{getIcon(currentRoute)}</Link>,
+    },
+    ...items.map((crumb, index) => ({
+      title: crumb.href ? (
+        <Link href={crumb.href}>
+          <span
+            className={`${
+              index === items.length - 1 ? "text-black" : "hover:underline"
+            }`}
+          >
+            {crumb.label}
+          </span>
+        </Link>
+      ) : (
+        <span className={`${index === items.length - 1 ? "text-black" : ""}`}>
+          {crumb.label}
+        </span>
+      ),
+    })),
+  ];
 
   return (
     <>
@@ -66,36 +94,7 @@ const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
           aria-label="breadcrumb"
           className="flex items-center space-x-2 text-sm text-gray-600 m-4"
         >
-          <AntBreadcrumb separator="/">
-            <AntBreadcrumb.Item>
-              <Link href="/">{getIcon(currentRoute)}</Link>
-            </AntBreadcrumb.Item>
-            {items?.map((crumb, index) => (
-              <AntBreadcrumb.Item key={index}>
-                {crumb.href ? (
-                  <Link href={crumb.href}>
-                    <span
-                      className={`${
-                        index === items.length - 1
-                          ? "text-black"
-                          : "hover:underline"
-                      }`}
-                    >
-                      {crumb.label}
-                    </span>
-                  </Link>
-                ) : (
-                  <span
-                    className={`${
-                      index === items.length - 1 ? "text-black" : ""
-                    }`}
-                  >
-                    {crumb.label}
-                  </span>
-                )}
-              </AntBreadcrumb.Item>
-            ))}
-          </AntBreadcrumb>
+          <AntBreadcrumb separator="/" items={breadcrumbItems} />
         </nav>
       </ConfigProvider>
     </>
