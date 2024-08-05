@@ -72,14 +72,12 @@ const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
 
   return (
     <>
-      <ConfigProvider theme={{ ...theme }}>
-        <nav
-          aria-label="breadcrumb"
-          className="flex items-center space-x-2 text-sm text-gray-600 m-4"
-        >
-          <AntBreadcrumb separator="/" items={breadcrumbItems} />
-        </nav>
-      </ConfigProvider>
+      <nav
+        aria-label="breadcrumb"
+        className="flex items-center space-x-2 text-sm text-gray-600 m-4"
+      >
+        <AntBreadcrumb separator="/" items={breadcrumbItems} />
+      </nav>
     </>
   );
 };
