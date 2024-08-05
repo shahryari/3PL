@@ -3,8 +3,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb as AntBreadcrumb, Skeleton, ConfigProvider } from "antd";
 import { Calendar, Home, InfoCircle, Building3 } from "iconsax-react";
-import theme from "../../../../theme/themeConfig";
-import { Space } from "../../../../node_modules/antd/es/index";
 
 export interface BreadcrumbItem {
   label: string;
