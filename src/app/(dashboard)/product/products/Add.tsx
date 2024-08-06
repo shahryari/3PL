@@ -10,13 +10,7 @@ import {
 
 const { TextArea } = Input;
 
-const AddProduct = ({
-  onFinish,
-  handleCancel,
-}: {
-  onFinish: (values: DataType) => void;
-  handleCancel: () => void;
-}) => {
+const AddProduct = ({ handleCancel }: { handleCancel: () => void }) => {
   const [isSerializable, setIsSerializable] = useState(false);
   const [isActive, setIsActive] = useState(true);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -25,8 +19,8 @@ const AddProduct = ({
   >("info");
 
   const onFinishHandler = async (values: DataType) => {
-    setAlertMessage(null); // Clear previous alert message
-    setAlertType("info"); // Reset alert type
+    setAlertMessage(null);
+    setAlertType("info");
 
     try {
       const response = await fetch(
@@ -35,8 +29,16 @@ const AddProduct = ({
           method: "POST",
           headers: {
             Accept: "application/json",
+            //contentType: "application/json",
           },
           credentials: "include",
+          body: JSON.stringify({
+            ProductCode: "sdfsdf",
+            ProductName: "wrwer",
+            GTINCODE: "sdfsdf",
+            Serializable: false,
+            IsActive: true,
+          }),
         }
       );
 
@@ -50,7 +52,7 @@ const AddProduct = ({
         } else {
           setAlertMessage("Product added successfully");
           setAlertType("success");
-          onFinish(values);
+          //onFinish(values);
         }
       } else {
         const errorText = await response.text();

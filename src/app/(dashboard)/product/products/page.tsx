@@ -532,7 +532,7 @@ const Products = () => {
             </Draggable>
           )}
         >
-          <AddProduct onFinish={handleFinish} handleCancel={handleCancel} />
+          <AddProduct handleCancel={handleCancel} />
         </Modal>
       </Card>
     </>
