@@ -82,10 +82,15 @@ const Sidebar = () => {
         setActiveMenu("/");
         setActive("/");
         break;
+      case "warehouse":
       case "product":
         setActiveMenu("product");
         setActive("/product/products");
         break;
+      // case "warehouse":
+      //   setActiveMenu("product");
+      //   setActive("/warehouse");
+      //   break;
       case "crs":
         setActiveMenu("crs");
         setActive("/crs");
@@ -133,14 +138,16 @@ const Sidebar = () => {
           <Link
             href={"/product/products"}
             className={`hover:bg-primary-400 rounded-full transition-all b h-9 w-9 flex justify-center items-center relative z-1  ${
-              pathname.split("/")[1] === "product" && "active bg-primary-500"
+              (pathname.split("/")[1] === "product" ||
+                pathname.split("/")[1] === "warehouse") &&
+              "active bg-primary-500"
             }`}
           >
             <Building3
               size={24}
               variant="Bulk"
               className={`${
-                active === "/pms/roomtype" ? "text-black" : "text-zinc-700"
+                active === "/product/products" ? "text-black" : "text-zinc-700"
               } `}
             />
           </Link>

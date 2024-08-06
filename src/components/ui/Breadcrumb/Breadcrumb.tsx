@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb as AntBreadcrumb, Skeleton, ConfigProvider } from "antd";
 import { Calendar, Home, InfoCircle, Building3 } from "iconsax-react";
+import { debug } from "console";
 
 export interface BreadcrumbItem {
   label: string;
@@ -22,8 +23,8 @@ const Breadcrumb = ({ items }: { items: BreadcrumbItem[] }) => {
   const getIcon = (route: string) => {
     if (route.startsWith("/product")) {
       return <Building3 size={20} variant="Bulk" className="text-zinc-700" />;
-    } else if (route.startsWith("/info")) {
-      return <InfoCircle size={20} variant="Bulk" className="text-zinc-700" />;
+    } else if (route.startsWith("/warehouse")) {
+      return <Building3 size={20} variant="Bulk" className="text-zinc-700" />;
     } else {
       return <Home size={20} variant="Bulk" className="text-zinc-700" />;
     }

@@ -20,7 +20,11 @@ const theme: ThemeConfig = {
     },
     Menu: {
         itemHoverBg:'#f7a400',
-        itemActiveBg: '#f7a400'
+        itemActiveBg: '#f7a400',
+        itemSelectedBg:'#f7a400',
+        itemBorderRadius:8,
+        itemColor:'#000',
+        itemSelectedColor:'#000'
       },
     Breadcrumb: {
           itemColor: "#969696",
@@ -30,7 +34,11 @@ const theme: ThemeConfig = {
         },
         Pagination:{
           itemActiveBg:"#f7a400"
-        }
+        },
+        Switch: {
+                colorPrimary: "#53B761",
+                colorPrimaryHover: "#00000",
+              },
   },
 };
 
