@@ -6,9 +6,12 @@ import React, { useState } from "react";
 
 import Cookies from "js-cookie";
 import Image from "next/image";
+import { useRouter } from "../../../node_modules/next/navigation";
 
 const Login = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+
   const onFinish = async (values: any) => {
     setLoading(true);
 
@@ -26,7 +29,6 @@ const Login = () => {
       }
 
       const data = await response.json();
-      // Assuming the API returns a token or session ID
       const { TokenID, FullName } = data;
 
       Cookies.set(".glctest", TokenID, {
@@ -38,8 +40,9 @@ const Login = () => {
       Cookies.set("name", FullName, { expires: 7, secure: true });
 
       message.success("Login successful!");
+
+      router.push("/product/products");
     } catch (error) {
-      // Handle error
       message.error("Login failed. Please try again.");
     } finally {
       setLoading(false);
@@ -132,12 +135,12 @@ const Login = () => {
           با اجاره انبارهای مدرن ما، امنیت، سرعت و بهره‌وری را به کسب‌وکار خود
           هدیه دهید. و آینده‌تان را تضمین کنید!
         </p>
-        <div className="image-container">
+        <div className="image-container relative w-full h-96">
           <Image
             src="/images/login-intro.png"
-            layout="fill"
-            objectFit="contain"
             alt="logo"
+            layout="fill" // Changed from `layout` to `fill`
+            objectFit="contain"
           />
         </div>
       </div>
