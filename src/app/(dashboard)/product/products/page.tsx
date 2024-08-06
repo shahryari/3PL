@@ -28,9 +28,16 @@ import Breadcrumb, {
   BreadcrumbItem,
 } from "./../../../../components/ui/Breadcrumb/Breadcrumb";
 import moment from "moment";
-import { Checkbox, ConfigProvider, DatePicker } from "../../../../../node_modules/antd/es/index";
+import {
+  Checkbox,
+  ConfigProvider,
+  DatePicker,
+} from "../../../../../node_modules/antd/es/index";
+import AddProduct from "./Add";
+import "./styles.css";
+
 const { TextArea } = Input;
-interface DataType {
+export interface ProductType {
   ProductID: string;
   ProductName: string;
   ProductCode: string;
@@ -39,13 +46,10 @@ interface DataType {
   Serializable: boolean;
   IsActive: boolean;
   CreatedOn: string;
-  AlphanumericField: string; // Added the AlphanumericField
 }
 
-type DataIndex = keyof DataType;
-
 const Products = () => {
-  const [data, setData] = useState<DataType[]>([]);
+  const [data, setData] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -63,7 +67,7 @@ const Products = () => {
 
   const getProducts = async (page: number, pageSize: number) => {
     setLoading(true);
-    const authToken = Cookies.get("authToken");
+    const authToken = Cookies.get(".glctest");
     if (!authToken) {
       setLoading(false);
       return;
@@ -178,7 +182,7 @@ const Products = () => {
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps["confirm"],
-    dataIndex: DataIndex
+    dataIndex: ProductType
   ) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -191,8 +195,8 @@ const Products = () => {
   };
 
   const getColumnSearchProps = (
-    dataIndex: DataIndex
-  ): TableColumnType<DataType> => ({
+    dataIndex: ProductType
+  ): TableColumnType<ProductType> => ({
     filterDropdown: ({
       setSelectedKeys,
       selectedKeys,
@@ -291,8 +295,8 @@ const Products = () => {
     });
   };
 
-  const handleSwitchChange = async (checked: boolean, record: DataType) => {
-    const authToken = Cookies.get("authToken");
+  const handleSwitchChange = async (checked: boolean, record: ProductType) => {
+    const authToken = Cookies.get(".glctest");
     if (!authToken) {
       message.error("Authentication token is missing");
       return;
@@ -334,7 +338,7 @@ const Products = () => {
     }
   };
 
-  const columns: TableColumnsType<DataType> = [
+  const columns: TableColumnsType<ProductType> = [
     {
       title: "شناسه",
       dataIndex: "ProductID",
@@ -389,7 +393,7 @@ const Products = () => {
             components: {
               Switch: {
                 colorPrimary: "#53B761",
-                colorPrimaryHover:"#00000",
+                colorPrimaryHover: "#00000",
               },
             },
           }}
@@ -413,48 +417,47 @@ const Products = () => {
       sortDirections: ["descend", "ascend"],
     },
   ];
-  
 
   const breadcrumbData: BreadcrumbItem[] = [
     { label: "کالا", href: "#" },
     { label: "لیست کالاها", href: "/product/products" }, // No href for the current page
   ];
- const onFinish = async (values) => {
-   try {
-     const response = await fetch(
-       `${process.env.NEXT_PUBLIC_API_URL}/ProductInsert`,
-       {
-         method: "POST",
-         headers: {
-           Accept: "application/json",
-           "Content-Type": "application/json",
-         },
-         body: JSON.stringify({
-           ProductCode: values.ProductCode,
-           ProductName: values.ProductName,
-           Description: values.Description,
-           GTINCODE: values.GTINCODE,
-           Serializable: values.Serializable,
-           IsActive: values.IsActive,
-         }),
-       }
-     );
+  const handleFinish = async ({ values }: { values: ProductType }) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/ProductInsert`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ProductCode: values.ProductCode,
+            ProductName: values.ProductName,
+            Description: values.Description,
+            GTINCODE: values.GTINCODE,
+            Serializable: values.Serializable,
+            IsActive: values.IsActive,
+          }),
+        }
+      );
 
-     if (!response.ok) {
-       throw new Error("Network response was not ok");
-     }
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
 
-     const result = await response.json();
-     if (result.success) {
-       message.success("Product added successfully!");
-       handleOk();
-     } else {
-       throw new Error(result.message || "Failed to add product");
-     }
-   } catch (error) {
-     message.error(`Failed to add product: ${error.message}`);
-   }
- };
+      const result = await response.json();
+      if (result.success) {
+        message.success("Product added successfully!");
+        handleOk();
+      } else {
+        throw new Error(result.message || "Failed to add product");
+      }
+    } catch (error) {
+      message.error(`Failed to add product: ${error.message}`);
+    }
+  };
   return (
     <>
       <Breadcrumb items={breadcrumbData} />
@@ -529,80 +532,7 @@ const Products = () => {
             </Draggable>
           )}
         >
-          <Form name="product-form" onFinish={onFinish} autoComplete="off">
-            <Form.Item
-              label="کد محصول"
-              name="ProductCode"
-              rules={[{ required: true, message: "کد محصول را وارد کنید" }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="نام محصول"
-              name="ProductName"
-              rules={[{ required: true, message: "نام محصول را وارد کنید" }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="توضیحات"
-              name="Description"
-              rules={[
-                { required: false, message: "Please input Description!" },
-              ]}
-            >
-              <TextArea rows={4} maxLength={6} />
-            </Form.Item>
-
-            <Form.Item
-              label="GTINCODE"
-              name="GTINCODE"
-              rules={[{ required: true, message: "Please input GTINCODE!" }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              name="Serializable"
-              valuePropName="checked"
-              initialValue={false}
-            >
-              <Checkbox>Serializable</Checkbox>
-            </Form.Item>
-
-            {/* <Form.Item
-              label="CreatedOn"
-              name="CreatedOn"
-              rules={[{ required: true, message: "Please select CreatedOn!" }]}
-            >
-              <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
-            </Form.Item> */}
-
-            <Form.Item
-              name="IsActive"
-              valuePropName="checked"
-              initialValue={true}
-            >
-              <Checkbox>IsActive</Checkbox>
-            </Form.Item>
-
-            <Form.Item>
-              <div className="flex justify-start space-x-2">
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="!bg-green-600 ml-2"
-                >
-                  ذخیره
-                </Button>
-                <Button onClick={handleCancel} className="!#F0F0F0">
-                  انصراف
-                </Button>
-              </div>
-            </Form.Item>
-          </Form>
+          <AddProduct onFinish={handleFinish} handleCancel={handleCancel} />
         </Modal>
       </Card>
     </>

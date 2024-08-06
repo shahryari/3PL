@@ -1,0 +1,87 @@
+/* styles/customPagination.css */
+
+.ant-pagination-item {
+    background-color: #f0f0f0;
+    border: 1px solid #d9d9d9 !important;
+    color: #000;
+    font-size: 16px;
+        height: 40px !important;
+            width: 40px !important;
+    line-height: 40px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+
+.ant-pagination-item-active {
+    border-top-right-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+    color:#000 !important;
+}
+.ant-pagination-item-active .nofollow{
+
+}
+.ant-pagination-item a[rel="nofollow"] {
+    color: #000 !important;
+}
+
+.ant-pagination-item a[rel="nofollow"]:hover {
+}
+.ant-pagination-prev{
+    display: none !important;
+}
+.anticon-right svg {
+
+    transform: rotate(180deg);
+}
+.ant-pagination-item-link{
+    background-color: white !important;
+    
+}
+.ant-pagination-next{
+height: 40px !important;
+    width: 40px !important;
+}
+.ant-pagination-options{
+    height: 40px !important;
+}
+.ant-pagination-item:hover {
+    background-color: #e6f7ff;
+    border-color: #1890ff;
+    color: #1890ff;
+}
+
+.ant-pagination-item a {
+    display: block;
+}
+
+.ant-pagination-prev,
+.ant-pagination-next {
+    background-color: #f0f0f0;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    height: 40px;
+    line-height: 40px;
+}
+
+.ant-pagination-prev button,
+.ant-pagination-next button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background: none;
+    border: none;
+    color: #000;
+}
+
+.ant-pagination-prev button:hover,
+.ant-pagination-next button:hover {
+    color: #1890ff;
+}
+
+.ant-pagination-options {
+    display: flex;
+    align-items: center;
+}

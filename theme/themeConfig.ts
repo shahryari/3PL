@@ -3,7 +3,16 @@ import { type ThemeConfig } from "antd";
 const theme: ThemeConfig = {
   token: {
     colorPrimary: '#f7a400',
+    colorError:'#FF0000',
+    colorSuccess:'#7BC641',
+    colorWarning:'#F7A400',
     fontSize: 14,
+    borderRadiusLG:4,
+    borderRadiusSM:8,
+    colorBorder:'#D9D9D9',
+    colorErrorBorder:'#FF0000',
+    lineHeightBase: 1.5,
+    paddingBase: '12px',
   },
   components: {
     Layout: {
@@ -19,6 +28,9 @@ const theme: ThemeConfig = {
           lastItemColor: "#000",
           separatorMargin: 12,
         },
+        Pagination:{
+          itemActiveBg:"#f7a400"
+        }
   },
 };
 
