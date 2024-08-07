@@ -2,16 +2,27 @@
 
 import { Button, Checkbox, Form, Input, message } from "antd";
 import { Lock, Sms } from "iconsax-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { useRouter } from "../../../node_modules/next/navigation";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
+   useEffect(() => {
+     // Remove unwanted attributes added by extensions
+     document
+       .querySelectorAll(
+         "[data-new-gr-c-s-check-loaded], [data-gr-ext-installed]"
+       )
+       .forEach((el) => {
+         el.removeAttribute("data-new-gr-c-s-check-loaded");
+         el.removeAttribute("data-gr-ext-installed");
+       });
+   }, []);
   const onFinish = async (values: any) => {
     setLoading(true);
 
@@ -62,7 +73,7 @@ const Login = () => {
               src="/images/fake-logo.png"
               width={100}
               height={100}
-              alt={"logo"}
+              alt="logo"
             />
           </div>
 
@@ -139,8 +150,8 @@ const Login = () => {
           <Image
             src="/images/login-intro.png"
             alt="logo"
-            layout="fill" // Changed from `layout` to `fill`
-            objectFit="contain"
+            fill
+            style={{ objectFit: "contain" }}
           />
         </div>
       </div>

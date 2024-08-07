@@ -39,6 +39,9 @@ const theme: ThemeConfig = {
                 colorPrimary: "#53B761",
                 colorPrimaryHover: "#00000",
               },
+               Button: {
+       contentLineHeightLG:1.5
+      },
   },
 };
 

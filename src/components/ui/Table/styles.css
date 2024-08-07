@@ -45,10 +45,19 @@ height: 40px !important;
 .ant-pagination-options{
     height: 40px !important;
 }
-.ant-input-prefix{
-position: absolute !important;
-    left: 0 !important;
-    top: 0 !important;
+.ant-card-head{
+        border-bottom: 1px solid #ffffff !important;
+}
+.ant-card-bordered{
+    border-bottom: 1px solid #ffffff !important;
+}
+.search-input {
+    width: 100px;
+    transition: width 0.3s;
+}
+
+.search-input:focus {
+    width: 200px;
 }
 .ant-pagination-item:hover {
     background-color: #e6f7ff;
