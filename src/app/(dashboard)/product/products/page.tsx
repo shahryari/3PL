@@ -36,7 +36,7 @@ const Products = () => {
     total: 0,
   });
 
-  const getProducts = async (page: number, pageSize: number) => {
+  const getProducts = async (page: number, pageSize: number, filters: any) => {
     setLoading(true);
     const authToken = Cookies.get(".glctest");
     if (!authToken) {
@@ -49,6 +49,7 @@ const Products = () => {
     urlencoded.append("rows", pageSize.toString());
     urlencoded.append("sort", "CreatedOn");
     urlencoded.append("order", "Desc");
+    urlencoded.append("filterRules", JSON.stringify(filters.filter));
 
     try {
       const response = await fetch(

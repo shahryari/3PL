@@ -21,7 +21,7 @@ interface TableProps<T> {
   title: string;
   data: T[];
   columns: TableColumnsType<T>;
-  fetchData: (page: number, pageSize: number) => Promise<void>;
+  fetchData: (page: number, pageSize: number, filters: any) => Promise<void>;
   addComponent?: AddItemComponentProps; // Make addComponent optional
   rowKey: string;
 }
@@ -30,6 +30,11 @@ interface AddItemComponentProps {
   addItemComponent?: React.FC<{ handleCancel: () => void }>;
   title?: string;
 }
+
+const baseFilter = {
+  filter: { groupOp: "and", groups: [], rules: [] },
+  initializefilter: { groupOp: "and", groups: [], rules: [] },
+};
 
 const Table = <T extends object>({
   title,
@@ -49,16 +54,18 @@ const Table = <T extends object>({
   const searchInput = useRef<Input>(null);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [filters, setFilters] = useState<any>(baseFilter);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-      const loadInitialData = async () => {
-        setLoading(true);
-        await fetchData(pagination.current, pagination.pageSize);
-        setLoading(false);
-      };
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setLoading(true);
+      await fetchData(pagination.current, pagination.pageSize, filters);
+      setLoading(false);
+    };
 
-      loadInitialData();
-    }, []);
+    loadInitialData();
+  }, []);
 
   const handleTableChange = (pagination) => {
     setPagination({
@@ -66,26 +73,57 @@ const Table = <T extends object>({
       pageSize: pagination.pageSize,
       total: pagination.total,
     });
-    fetchData(pagination.current, pagination.pageSize);
+    fetchData(pagination.current, pagination.pageSize, filters);
   };
 
-  const handleSearch = (value: string, dataIndex: keyof T) => {
-    setSearchText((prev) => ({
-      ...prev,
-      [dataIndex]: value,
-    }));
-  };
+ const handleSearch = async (dataIndex: keyof T) => {
+   const value = searchText[dataIndex];
+   const newFilters = { ...filters };
+   newFilters.filter.rules.push({
+     field: dataIndex,
+     op: "contains",
+     value: value,
+   });
+   setFilters(newFilters);
+
+   setLoading(true);
+   await fetchData(pagination.current, pagination.pageSize, newFilters);
+   setLoading(false);
+
+   setSearchText((prev) => ({
+     ...prev,
+     [dataIndex]: "",
+   }));
+ };
+
+const handleInputChange = (
+  e: React.ChangeEvent<HTMLInputElement>,
+  dataIndex: keyof T
+) => {
+  const { value } = e.target;
+  setSearchText((prev) => ({
+    ...prev,
+    [dataIndex]: value,
+  }));
+
+  if (debounceRef.current) {
+    clearTimeout(debounceRef.current);
+  }
+
+  debounceRef.current = setTimeout(() => {
+    handleSearch(dataIndex);
+  }, 500); 
+};
   const handleFocus = (e, dataIndex) => {
+    e.stopPropagation();
     setFocusedInput(dataIndex as string);
-    const inputElement = e.target as HTMLInputElement;
-    inputElement.style.width = "90px";
+    console.log(e.target, dataIndex as string);
   };
 
-  const handleBlur = (e) => {
+  const handleBlur = () => {
     setFocusedInput(null);
-    const inputElement = e.target as HTMLInputElement;
-    inputElement.style.width = "";
   };
+
   const handleClick = (e) => {
     e.stopPropagation();
   };
@@ -99,7 +137,7 @@ const Table = <T extends object>({
             ref={searchInput}
             placeholder={`Search `}
             value={searchText[dataIndex] || ""}
-            onChange={(e) => handleSearch(e.target.value, dataIndex)}
+            onChange={(e) => handleInputChange(e, dataIndex)}
             onFocus={(e) => handleFocus(e, dataIndex)}
             onBlur={handleBlur}
             onClick={handleClick}
@@ -108,7 +146,13 @@ const Table = <T extends object>({
                 <Sort size="32" color="#d9e3f0" variant="Bulk" />
               ) : null
             }
-            style={{ marginRight: 8,position:"relative", display: "inline-block" }}
+            style={{
+              marginRight: 8,
+              position: "relative",
+              display: "inline-block",
+              transition: "width 0.3s ease",
+              width: focusedInput === dataIndex ? "90px" : "30px",
+            }}
           />
         </div>
       </>
@@ -166,7 +210,6 @@ const Table = <T extends object>({
                   </span>
                 </Button>
               ) : null}
-              
             </div>
           </div>
 
