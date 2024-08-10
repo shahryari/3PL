@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: React.PropsWithChildren) => (
   <html lang="fa">
-    <body className={`${yekan.variable} px-4 antialiased`}>
+    <body className={`${yekan.variable} antialiased`}>
       <ConfigProvider theme={{ ...theme }}>
         <AntdRegistry>
-          <div className="flex flex-col my-4 gap-y-4 h-full">
+          <div className="flex flex-col gap-y-4 h-full">
             <div className="flex flex-row h-screen gap-x-2">
               <div className="w-full">{children}</div>
             </div>

@@ -74,3 +74,7 @@ body {
   height: 100%; /* Set your desired height */
   margin: 50px;
 }
+
+[class^="ant-"] {
+  font-family: var(--font-yekan) !important;
+}

@@ -12,17 +12,17 @@ const Login = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
-   useEffect(() => {
-     // Remove unwanted attributes added by extensions
-     document
-       .querySelectorAll(
-         "[data-new-gr-c-s-check-loaded], [data-gr-ext-installed]"
-       )
-       .forEach((el) => {
-         el.removeAttribute("data-new-gr-c-s-check-loaded");
-         el.removeAttribute("data-gr-ext-installed");
-       });
-   }, []);
+  useEffect(() => {
+    // Remove unwanted attributes added by extensions
+    document
+      .querySelectorAll(
+        "[data-new-gr-c-s-check-loaded], [data-gr-ext-installed]"
+      )
+      .forEach((el) => {
+        el.removeAttribute("data-new-gr-c-s-check-loaded");
+        el.removeAttribute("data-gr-ext-installed");
+      });
+  }, []);
   const onFinish = async (values: any) => {
     setLoading(true);
 
@@ -87,7 +87,6 @@ const Login = () => {
           <Form
             name="basic"
             layout="vertical"
-            initialValues={{ remember: true }}
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
             autoComplete="off"
@@ -96,9 +95,7 @@ const Login = () => {
             <Form.Item
               label="ایمیل"
               name="UserName"
-              rules={[
-                { required: true, message: "Please input your username!" },
-              ]}
+              rules={[{ required: true, message: "نام کاربری را وارد کنید" }]}
             >
               <Input
                 prefix={<Sms variant="Bulk" />}
@@ -109,9 +106,7 @@ const Login = () => {
             <Form.Item
               label="رمزعبور"
               name="Password"
-              rules={[
-                { required: true, message: "Please input your password!" },
-              ]}
+              rules={[{ required: true, message: "رمزعبور را وارد کنید" }]}
             >
               <Input.Password
                 prefix={<Lock variant="Bulk" />}
@@ -119,15 +114,11 @@ const Login = () => {
               />
             </Form.Item>
 
-            <Form.Item name="remember" valuePropName="checked">
-              <Checkbox>من را به خاطر بسپار</Checkbox>
-            </Form.Item>
-
             <Form.Item>
               <div>
                 <Button
                   loading={loading}
-                  className="bg-green-400 justify-center text-white hover:bg-green-800 hover:text-primary-foreground border-0"
+                  className="!bg-green-600 !h-8 !hover:bg-green-700 !px-4 !text-white !border-0"
                   htmlType="submit"
                   block
                 >

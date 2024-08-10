@@ -1,71 +1,62 @@
 "use client";
 
-import { Add, ArrowDown2, InfoCircle, SearchNormal } from "iconsax-react";
+import Cookies from "js-cookie";
+import { useState, useEffect } from "react";
+import Breadcrumb from "tpl/components/ui/Breadcrumb/Breadcrumb";
+import Table from "tpl/components/ui/Table/Table";
 import {
-  Button,
-  Card,
+  message,
+  Checkbox,
   Dropdown,
-  Form,
-  Input,
-  InputRef,
+  Card,
   MenuProps,
   Modal,
-  Space,
+  Form,
+  Input,
+  Button,
   Switch,
-  Table,
-  TableColumnType,
-  TableColumnsType,
-  message,
+  TimePicker,
+  Select,
+  DatePicker,
+  Divider,
 } from "antd";
-import type { DraggableData, DraggableEvent } from "react-draggable";
-import { useEffect, useRef, useState } from "react";
+import format from "dayjs";
+import { Add, ArrowDown2, CloseCircle, DocumentDownload } from "iconsax-react";
 
-import Cookies from "js-cookie";
-import Draggable from "react-draggable";
-import { FilterDropdownProps } from "antd/es/table/interface";
-import Highlighter from "react-highlight-words";
+const { RangePicker } = DatePicker;
+const { Option } = Select;
 
-import moment from "moment";
-
-import Breadcrumb from "tpl/components/ui/Breadcrumb/Breadcrumb";
-import { UUID } from "crypto";
-
-const { TextArea } = Input;
-export interface WarehouseType {
-  warehouseID: UUID; 
-  warehouseCode: string;
-  warehouseName: string;
-  description: string;
-  cityTitle: string;
-  provinceTitle: string;
-  addressFinal: string;
-  fax: string;
-  openTime?: string; 
-  closeTime?: string; 
-  warehouseAddress: string;
-  warehouseTel: string;
-  createdOn: Date;
-  isActive: boolean;
+export interface ProductType {
+  ProductID: string;
+  ProductName: string;
+  ProductCode: string;
+  GTINCODE: string;
+  Description: string;
+  Serializable: boolean;
+  IsActive: boolean;
+  CreatedOn: string;
 }
 
-const Warehouses = () => {
-  const [data, setData] = useState<WarehouseType[]>([]);
+// Define the naturalSort function
+const naturalSort = (a: string, b: string) => {
+  return a.localeCompare(b, undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+};
+
+const Products = () => {
+  const [data, setData] = useState<ProductType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
+
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 7,
     total: 0,
   });
-  const [open, setOpen] = useState(false);
-  const [disabled, setDisabled] = useState(true);
-  const [bounds, setBounds] = useState({
-    left: 0,
-    top: 0,
-    bottom: 0,
-    right: 0,
-  });
 
-  const getProducts = async (page: number, pageSize: number) => {
+  const getProducts = async (page: number, pageSize: number, filters: any) => {
     setLoading(true);
     const authToken = Cookies.get(".glctest");
     if (!authToken) {
@@ -78,10 +69,11 @@ const Warehouses = () => {
     urlencoded.append("rows", pageSize.toString());
     urlencoded.append("sort", "CreatedOn");
     urlencoded.append("order", "Desc");
+    urlencoded.append("filterRules", JSON.stringify(filters.filter));
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Warehouses`,
+        `${process.env.NEXT_PUBLIC_API_URL}/products`,
         {
           method: "POST",
           headers: {
@@ -100,7 +92,7 @@ const Warehouses = () => {
       setData(products.rows);
       setPagination((prev) => ({
         ...prev,
-        total: products.total, // Update total number of items
+        total: products.total,
       }));
     } catch (error) {
       message.error("Failed to load products");
@@ -109,359 +101,384 @@ const Warehouses = () => {
     }
   };
 
-  useEffect(() => {
-    getProducts(pagination.current, pagination.pageSize);
-  }, [pagination.current, pagination.pageSize]);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleTableChange = (pagination) => {
-    setPagination({
-      ...pagination,
-      current: pagination.current,
-      pageSize: pagination.pageSize,
-    });
-  };
-
-  const draggleRef = useRef<HTMLDivElement>(null);
-
-  const showModal = () => {
-    setOpen(true);
-  };
-
-  const handleOk = () => {
-    setOpen(false);
-  };
-
-  const handleCancel = () => {
-    setOpen(false);
-  };
-
-  const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
-    const { clientWidth, clientHeight } = window.document.documentElement;
-    const targetRect = draggleRef.current?.getBoundingClientRect();
-    if (!targetRect) {
+  const handleSwitchChange = async (checked: boolean, record: ProductType) => {
+    const authToken = Cookies.get(".glctest");
+    if (!authToken) {
+      message.error("Authentication token is missing");
       return;
     }
-    setBounds({
-      left: -targetRect.left + uiData.x,
-      right: clientWidth - (targetRect.right - uiData.x),
-      top: -targetRect.top + uiData.y,
-      bottom: clientHeight - (targetRect.bottom - uiData.y),
-    });
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products/${record.ProductID}/activate`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ isActive: checked }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        message.success("Status updated successfully");
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.ProductID === record.ProductID
+              ? { ...item, IsActive: checked }
+              : item
+          )
+        );
+      } else {
+        throw new Error("Failed to update status");
+      }
+    } catch (error) {
+      message.error("Failed to update status");
+    }
   };
 
-  const items: MenuProps["items"] = [
+  const onFinish = (values: any) => {
+    console.log("موفقیت:", values);
+  };
+
+  const onFinishFailed = (errorInfo: any) => {
+    console.log("شکست:", errorInfo);
+  };
+
+  const columns = [
     {
-      label: "1st menu item",
-      key: "1",
+      title: "شناسه محصول",
+      dataIndex: "ProductID",
+      key: "ProductID",
+      align: "center",
+      sorter: (a: ProductType, b: ProductType) =>
+        naturalSort(a.ProductID, b.ProductID),
+      searchable: true,
     },
     {
-      label: "2nd menu item",
-      key: "2",
+      title: "نام محصول",
+      dataIndex: "ProductName",
+      key: "ProductName",
+      align: "center",
+      sorter: (a: ProductType, b: ProductType) =>
+        naturalSort(a.ProductName, b.ProductName),
+      searchable: true,
     },
     {
-      label: "3rd menu item",
-      key: "3",
-      danger: true,
+      title: "کد محصول",
+      dataIndex: "ProductCode",
+      key: "ProductCode",
+      align: "center",
+      sorter: (a: ProductType, b: ProductType) =>
+        naturalSort(a.ProductCode, b.ProductCode),
+      searchable: true,
     },
     {
-      label: "4rd menu item",
-      key: "4",
-      danger: true,
-      disabled: true,
+      title: "کد GTIN",
+      dataIndex: "GTINCODE",
+      key: "GTINCODE",
+      align: "center",
+      sorter: (a: ProductType, b: ProductType) =>
+        naturalSort(a.GTINCODE, b.GTINCODE),
+      searchable: true,
+    },
+    {
+      title: "توضیحات",
+      dataIndex: "Description",
+      key: "Description",
+      align: "center",
+      searchable: true,
+    },
+    {
+      title: "سریال",
+      dataIndex: "Serializable",
+      key: "Serializable",
+      align: "center",
+      render: (Serializable: boolean) => (
+        <Checkbox checked={Serializable} disabled />
+      ),
+      searchable: true,
+    },
+    {
+      title: "وضعیت",
+      dataIndex: "IsActive",
+      key: "IsActive",
+      align: "center",
+      render: (IsActive: boolean, record: ProductType) => (
+        <Switch
+          checked={IsActive}
+          onChange={(checked) => handleSwitchChange(checked, record)}
+        />
+      ),
+    },
+    {
+      title: "تاریخ ثبت",
+      dataIndex: "CreatedOn",
+      key: "CreatedOn",
+      align: "center",
+      sorter: (a: ProductType, b: ProductType) =>
+        naturalSort(a.CreatedOn, b.CreatedOn),
+      render: (CreatedOn: string) => (
+        <span>{format(CreatedOn).format("YYYY-MM-DD HH:mm:ss")}</span>
+      ),
+      searchable: true,
     },
   ];
 
-  const menuProps = {
-    items,
-  };
-
-  const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
-  const searchInput = useRef<InputRef>(null);
-
-  const handleSearch = (
-    selectedKeys: string[],
-    confirm: FilterDropdownProps["confirm"],
-    dataIndex: WarehouseType
-  ) => {
-    confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
-  };
-
-  const handleReset = (clearFilters: () => void) => {
-    clearFilters();
-    setSearchText("");
-  };
-
-  const getColumnSearchProps = (
-    dataIndex: WarehouseType
-  ): TableColumnType<WarehouseType> => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-      close,
-    }) => (
-      <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
-        <Input
-          ref={searchInput}
-          placeholder={`جستجو کنید...`}
-          value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
-          onPressEnter={() =>
-            handleSearch(selectedKeys as string[], confirm, dataIndex)
-          }
-          style={{ marginBottom: 8, display: "block" }}
-        />
-        <Space>
-          <Button
-            type="primary"
-            onClick={() =>
-              handleSearch(selectedKeys as string[], confirm, dataIndex)
-            }
-            icon={<SearchNormal size={14} />}
-            size="small"
-            style={{ width: 90 }}
-          >
-            جستجو
-          </Button>
-          <Button
-            onClick={() => clearFilters && handleReset(clearFilters)}
-            size="small"
-            style={{ width: 90 }}
-          >
-            بازنشانی
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              confirm({ closeDropdown: false });
-              setSearchText((selectedKeys as string[])[0]);
-              setSearchedColumn(dataIndex);
-            }}
-          >
-            فیلتر
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              close();
-            }}
-          >
-            بستن
-          </Button>
-        </Space>
-      </div>
-    ),
-    filterIcon: (filtered: boolean) => (
-      <SearchNormal
-        style={{ color: filtered ? "#1677ff" : undefined }}
-        size={14}
-      />
-    ),
-    onFilter: (value, record) =>
-      record[dataIndex]
-        .toString()
-        .toLowerCase()
-        .includes((value as string).toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ""}
-        />
-      ) : (
-        text
-      ),
-  });
-
-  const naturalSort = (a: string, b: string) => {
-    return a.localeCompare(b, undefined, {
-      numeric: true,
-      sensitivity: "base",
-    });
-  };
-
-  const handleSwitchChange = async (
-    checked: boolean,
-    record: WarehouseType
-  ) => {
-    const authToken = Cookies.get(".glctest");
-
-   
-  };
-
-const columns: TableColumnsType<WarehouseType> = [
-  {
-    title: "شناسه",
-    dataIndex: "WarehouseID",
-    key: "WarehouseID",
-    ...getColumnSearchProps("WarehouseID"),
-    sorter: (a, b) => a.WarehouseID.localeCompare(b.WarehouseID),
-    sortDirections: ["descend", "ascend"],
-    hidden: true,
-  },
-  {
-    title: "نام انبار",
-    dataIndex: "WarehouseName",
-    key: "WarehouseName",
-    ...getColumnSearchProps("WarehouseName"),
-    sorter: (a, b) => a.WarehouseName.localeCompare(b.WarehouseName),
-    sortDirections: ["descend", "ascend"],
-  },
-  {
-    title: "کد انبار",
-    dataIndex: "WarehouseCode",
-    key: "WarehouseCode",
-    ...getColumnSearchProps("WarehouseCode"),
-    sorter: (a, b) => a.WarehouseCode.localeCompare(b.WarehouseCode),
-    sortDirections: ["descend", "ascend"],
-  },
-  {
-    title: "شهر",
-    dataIndex: "CityTitle",
-    key: "CityTitle",
-    ...getColumnSearchProps("CityTitle"),
-    sorter: (a, b) => a.CityTitle.localeCompare(b.CityTitle),
-    sortDirections: ["descend", "ascend"],
-  },
-  {
-    title: "استان",
-    dataIndex: "ProvinceTitle",
-    key: "ProvinceTitle",
-    ...getColumnSearchProps("ProvinceTitle"),
-    sorter: (a, b) => a.ProvinceTitle.localeCompare(b.ProvinceTitle),
-    sortDirections: ["descend", "ascend"],
-  },
-  {
-    title: "توضیحات",
-    dataIndex: "Description",
-    key: "Description",
-    ...getColumnSearchProps("Description"),
-    sorter: (a, b) => a.Description.length - b.Description.length,
-    sortDirections: ["descend", "ascend"],
-  },
-  {
-    title: "وضعیت",
-    dataIndex: "IsActive",
-    key: "IsActive",
-    render: (_, record) => (
-      <Switch
-        checked={record.IsActive}
-        onChange={(checked) => handleSwitchChange(checked, record)}
-      />
-    ),
-    sorter: (a, b) => Number(a.IsActive) - Number(b.IsActive),
-    sortDirections: ["descend", "ascend"],
-  },
-  {
-    title: "تاریخ ایجاد",
-    dataIndex: "CreatedOn",
-    key: "CreatedOn",
-    render: (text) => moment(text).format("YYYY/MM/DD - HH:mm"), // Format the date
-    sorter: (a, b) =>
-      new Date(a.CreatedOn).getTime() - new Date(b.CreatedOn).getTime(),
-    sortDirections: ["descend", "ascend"],
-  },
-];
-
-  const breadcrumbData: BreadcrumbItem[] = [
+  const breadcrumbItems = [
     { label: "اطلاعات پایه", href: "#" },
-    { label: "انبار", href: "/warehouse" },
+    { label: "انبار", href: "#" },
+    { label: "لیست انبار", href: "/warehouse/warehouses" },
+  ];
+
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.antgroup.com"
+        >
+          حذف
+        </a>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.aliyun.com"
+        >
+          کپی
+        </a>
+      ),
+    },
   ];
 
   return (
     <>
-      <Breadcrumb items={breadcrumbData} />
-      <Card title="لیست انبار" extra={<InfoCircle />}>
+      <Breadcrumb items={breadcrumbItems} />
+      <Card>
         <div className="flex flex-col gap-y-4">
           <div className="flex justify-between">
-            <Dropdown menu={menuProps}>
+            <Dropdown menu={{ items }}>
               <Button>
-                <Space>
+                <div className="flex items-center justify-between gap-x-2">
                   اکشن دسته جمعی
                   <ArrowDown2 size={18} />
-                </Space>
+                </div>
               </Button>
             </Dropdown>
-            <div>
-              <Button
-                type="primary"
-                className="flex flex-row items-center"
-                onClick={showModal}
-              >
-                <Add className="text-black" />
-                <span className="text-black">افزودن آیتم جدید</span>
+            <div className="flex items-center gap-2">
+              <Button>
+                <DocumentDownload size={20} variant="TwoTone" />
+                خروجی CSV
+              </Button>
+              <Button type="primary" onClick={handleOpen}>
+                <Add />
+                افزودن افزودن آیتم جدید
               </Button>
             </div>
           </div>
-
           <Table
+            title="لیست انبارها"
+            data={data}
             columns={columns}
-            dataSource={data}
-            pagination={{
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              total: pagination.total,
-              showSizeChanger: true,
-              hideOnSinglePage: true,
-              position: ["bottomLeft"],
-            }}
-            loading={loading}
-            onChange={handleTableChange}
+            fetchData={getProducts}
+            rowKey="ProductID"
           />
-        </div>
 
-        <Modal
-          centered
-          title={
-            <div
-              style={{ width: "100%", cursor: "move" }}
-              onMouseOver={() => {
-                if (disabled) {
-                  setDisabled(false);
-                }
-              }}
-              onMouseOut={() => {
-                setDisabled(true);
-              }}
+          <Modal
+            title={"افزودن انبار جدید"}
+            closeIcon={<CloseCircle />}
+            open={open}
+            onOk={handleClose}
+            onCancel={handleClose}
+            footer={[]}
+            width={900}
+          >
+            <Divider />
+            <Form
+              name="warehouseForm"
+              onFinish={onFinish}
+              onFinishFailed={onFinishFailed}
+              layout="vertical"
+              className="space-y-6"
+              size="large"
             >
-              افزودن کالا
-            </div>
-          }
-          open={open}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          footer={null}
-          modalRender={(modal) => (
-            <Draggable
-              disabled={disabled}
-              bounds={bounds}
-              nodeRef={draggleRef}
-              onStart={(event, uiData) => onStart(event, uiData)}
-            >
-              <div ref={draggleRef}>{modal}</div>
-            </Draggable>
-          )}
-        >
-          {/* <AddProduct handleCancel={handleCancel} /> */}
-        </Modal>
+              {/* Row 1 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item
+                  label="کد انبار"
+                  name="warehouseCode"
+                  rules={[
+                    { required: true, message: "لطفاً کد انبار را وارد کنید!" },
+                  ]}
+                >
+                  <Input
+                    placeholder="کد انبار را وارد کنید"
+                    className="rounded-md shadow-sm"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="نام انبار"
+                  name="warehouseName"
+                  rules={[
+                    {
+                      required: true,
+                      message: "لطفاً نام انبار را وارد کنید!",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="نام انبار را وارد کنید"
+                    className="rounded-md shadow-sm"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="استان"
+                  name="province"
+                  rules={[
+                    { required: true, message: "لطفاً استان را انتخاب کنید!" },
+                  ]}
+                >
+                  <Select
+                    placeholder="استان را انتخاب کنید"
+                    className="rounded-md shadow-sm"
+                  >
+                    {/* Replace with actual province options */}
+                    <Option value="province1">استان ۱</Option>
+                    <Option value="province2">استان ۲</Option>
+                  </Select>
+                </Form.Item>
+              </div>
+
+              {/* Row 2 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Form.Item
+                  label="شهر"
+                  name="city"
+                  rules={[
+                    { required: true, message: "لطفاً شهر را انتخاب کنید!" },
+                  ]}
+                >
+                  <Select
+                    placeholder="شهر را انتخاب کنید"
+                    className="rounded-md shadow-sm"
+                  >
+                    {/* Replace with actual city options */}
+                    <Option value="city1">شهر ۱</Option>
+                    <Option value="city2">شهر ۲</Option>
+                  </Select>
+                </Form.Item>
+
+                <Form.Item
+                  label="آدرس"
+                  name="address"
+                  rules={[
+                    { required: true, message: "لطفاً آدرس را وارد کنید!" },
+                  ]}
+                >
+                  <Input
+                    placeholder="آدرس را وارد کنید"
+                    className="rounded-md shadow-sm"
+                  />
+                </Form.Item>
+              </div>
+
+              {/* Row 3 */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Form.Item label="شماره تماس (اختیاری)" name="phoneNumber">
+                  <Input
+                    type="number"
+                    placeholder="شماره تماس را وارد کنید"
+                    className="rounded-md shadow-sm"
+                  />
+                </Form.Item>
+                <Form.Item label="کدپستی" name="postalCode">
+                  <Input
+                    type="number"
+                    placeholder="کدپستی را وارد کنید"
+                    className="rounded-md shadow-sm"
+                  />
+                </Form.Item>
+
+                <Form.Item label="ساعت پایان کار" name="endTime">
+                  <TimePicker format="HH:mm" className="rounded-md shadow-sm" />
+                </Form.Item>
+
+                <Form.Item label="ساعت شروع کار" name="startTime">
+                  <TimePicker format="HH:mm" className="rounded-md shadow-sm" />
+                </Form.Item>
+              </div>
+
+              {/* Row 4 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Form.Item label="موقعیت جغرافیایی" name="location">
+                  <Button type="default" className="w-full">
+                    تنظیم موقعیت
+                  </Button>
+                </Form.Item>
+
+                <div className="bg-gray-100 flex flex-row items-center justify-between h-10 rounded-lg px-6 mt-[30px]">
+                  <p>وضعیت</p>
+                  <Form.Item
+                    label=""
+                    name="status"
+                    valuePropName="checked"
+                    className="!m-0"
+                  >
+                    <Switch />
+                  </Form.Item>
+                </div>
+
+                {/* Empty item for spacing */}
+                <Form.Item>
+                  <div></div>
+                </Form.Item>
+              </div>
+
+              <div className="flex gap-x-2 justify-end">
+                <Form.Item className="!mb-0">
+                  <Button
+                    size="small"
+                    type="primary"
+                    htmlType="submit"
+                    className="w-full !bg-green-600 !h-8 !hover:bg-green-900 !px-4 !text-white"
+                  >
+                    ذخیره
+                  </Button>
+                </Form.Item>
+                <Form.Item className="!mb-0">
+                  <Button
+                    size="small"
+                    className="w-full !bg-white !h-8  !px-4 !text-black"
+                  >
+                    انصراف
+                  </Button>
+                </Form.Item>
+              </div>
+            </Form>
+          </Modal>
+        </div>
       </Card>
     </>
   );
 };
 
-export default Warehouses;
+export default Products;

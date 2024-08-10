@@ -8,8 +8,6 @@ import {
   Table as AntTable,
   TableColumnType,
   TableColumnsType,
-  menuProps,
-  message,
 } from "antd";
 import { useEffect, useRef, useState } from "react";
 import Highlighter from "react-highlight-words";
@@ -76,44 +74,44 @@ const Table = <T extends object>({
     fetchData(pagination.current, pagination.pageSize, filters);
   };
 
- const handleSearch = async (dataIndex: keyof T) => {
-   const value = searchText[dataIndex];
-   const newFilters = { ...filters };
-   newFilters.filter.rules.push({
-     field: dataIndex,
-     op: "contains",
-     value: value,
-   });
-   setFilters(newFilters);
+  const handleSearch = async (dataIndex: keyof T) => {
+    const value = searchText[dataIndex];
+    const newFilters = { ...filters };
+    newFilters.filter.rules.push({
+      field: dataIndex,
+      op: "contains",
+      value: value,
+    });
+    setFilters(newFilters);
 
-   setLoading(true);
-   await fetchData(pagination.current, pagination.pageSize, newFilters);
-   setLoading(false);
+    setLoading(true);
+    await fetchData(pagination.current, pagination.pageSize, newFilters);
+    setLoading(false);
 
-   setSearchText((prev) => ({
-     ...prev,
-     [dataIndex]: "",
-   }));
- };
+    setSearchText((prev) => ({
+      ...prev,
+      [dataIndex]: "",
+    }));
+  };
 
-const handleInputChange = (
-  e: React.ChangeEvent<HTMLInputElement>,
-  dataIndex: keyof T
-) => {
-  const { value } = e.target;
-  setSearchText((prev) => ({
-    ...prev,
-    [dataIndex]: value,
-  }));
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    dataIndex: keyof T
+  ) => {
+    const { value } = e.target;
+    setSearchText((prev) => ({
+      ...prev,
+      [dataIndex]: value,
+    }));
 
-  if (debounceRef.current) {
-    clearTimeout(debounceRef.current);
-  }
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
 
-  debounceRef.current = setTimeout(() => {
-    handleSearch(dataIndex);
-  }, 500); 
-};
+    debounceRef.current = setTimeout(() => {
+      handleSearch(dataIndex);
+    }, 500);
+  };
   const handleFocus = (e, dataIndex) => {
     e.stopPropagation();
     setFocusedInput(dataIndex as string);
@@ -185,64 +183,26 @@ const handleInputChange = (
     };
   });
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
   return (
     <>
-      <Card title={title} extra={<InfoCircle />}>
-        <div className="flex flex-col gap-y-4">
-          <div className="flex justify-between">
-            <Dropdown menu={menuProps}>
-              <Button>
-                <Space>
-                  اکشن دسته جمعی
-                  <ArrowDown2 size={18} />
-                </Space>
-              </Button>
-            </Dropdown>
-            <div>
-              {addComponent && addComponent.addItemComponent ? (
-                <Button type="primary" size="default" onClick={handleOpen}>
-                  <Add className="text-black" />
-                  <span className="text-black ">
-                    {addComponent.title || "Add Item"}
-                  </span>
-                </Button>
-              ) : null}
-            </div>
-          </div>
-
-          <AntTable
-            columns={updatedColumns}
-            dataSource={data}
-            rowKey={rowKey}
-            pagination={{
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              total: pagination.total,
-              showSizeChanger: true,
-            }}
-            loading={loading}
-            scroll={{
-              x: "100",
-            }}
-            onChange={handleTableChange}
-          />
-        </div>
-      </Card>
-      <Modal
-        title={addComponent?.title || "Add New Item"}
-        open={open}
-        onOk={handleClose}
-        onCancel={handleClose}
-      >
-        {addComponent?.addItemComponent ? (
-          <addComponent.addItemComponent handleCancel={handleClose} />
-        ) : (
-          ""
-        )}
-      </Modal>
+      <div className="flex flex-col gap-y-4">
+        <AntTable
+          columns={updatedColumns}
+          dataSource={data}
+          rowKey={rowKey}
+          pagination={{
+            current: pagination.current,
+            pageSize: pagination.pageSize,
+            total: pagination.total,
+            showSizeChanger: true,
+          }}
+          loading={loading}
+          scroll={{
+            x: "100",
+          }}
+          onChange={handleTableChange}
+        />
+      </div>
     </>
   );
 };

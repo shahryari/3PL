@@ -116,7 +116,7 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`bg-white inline-flex flex-row h-full min-w-12 rounded-lg
+      className={`bg-white inline-flex flex-row h-full min-w-60 rounded-lg
       `}
     >
       <div
@@ -124,7 +124,7 @@ const Sidebar = () => {
       >
         <div className="flex flex-col items-center justify-between gap-y-8 menu-sider">
           <Link
-            href={"/"}
+            href={"/dashboard"}
             className={`hover:bg-primary-400 rounded-full transition-all b h-9 w-9 flex justify-center items-center relative z-1 ${
               pathname.split("/")[1] === "" && "active bg-primary-500"
             }`}
@@ -132,7 +132,7 @@ const Sidebar = () => {
             <Category2
               size={24}
               variant="Bulk"
-              className={`${active === "/" ? "text-black" : "text-zinc-700"}`}
+              className={`${active === "/dashboard" ? "text-black" : "text-zinc-700"}`}
             />
           </Link>
           <Link
